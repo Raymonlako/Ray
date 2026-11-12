@@ -49,7 +49,7 @@ html, body { height: 100%; margin: 0; background: var(--sea); color: var(--ink);
 }
 .card {
   width: min(460px, 100%); background: var(--panel); border: 1px solid var(--line);
-  padding: 28px 26px 24px; display: flex; flex-direction: column; gap: 14px; text-align: center;
+  padding: 22px 24px 20px; display: flex; flex-direction: column; gap: 12px; text-align: center;
 }
 .eyebrow { font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: var(--brass); font-weight: 600; }
 h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 9vw, 52px); line-height: .95; margin: 0; text-wrap: balance; color: var(--ink); }
@@ -71,6 +71,32 @@ button:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
 .stats div { display: flex; flex-direction: column; }
 .stats strong { font-size: 30px; font-weight: 700; }
 .small { font-size: 14px !important; opacity: .7 !important; }
+.screen { overflow-y: auto; place-items: safe center; }
+.card.wide { width: min(540px, 100%); }
+.cast { display: grid; gap: 12px; text-align: left; }
+.cast-row { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+.cast-row.lead { padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.avatar {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--display); font-size: 14px; color: var(--ink); box-shadow: inset 0 -4px 0 rgba(0,0,0,.25);
+}
+.cast-role { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--brass); font-weight: 600; }
+.cast-name { font-weight: 700; font-size: 20px; letter-spacing: .02em; line-height: 1.1; }
+.cast-desc { font-size: 15px; line-height: 1.3; opacity: .85; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-row button { flex: 1 1 170px; }
+button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
+#crew { display: flex; flex-direction: column; gap: 5px; font-size: 15px; text-transform: none; letter-spacing: .02em; }
+.crew-row { display: flex; align-items: center; gap: 8px; text-shadow: 0 1px 0 rgba(0,0,0,.6); }
+.crew-row .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.crew-row .st { opacity: .75; }
+.crew-row.down .st { color: var(--signal); opacity: 1; font-weight: 700; }
+#demoTag {
+  position: fixed; top: calc(env(safe-area-inset-top, 0px) + 14px); left: 50%; transform: translateX(-50%);
+  font-size: 13px; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; color: var(--brass);
+  background: var(--panel); border: 1px solid var(--line); padding: 5px 12px; pointer-events: none; white-space: nowrap;
+}
+@media (max-width: 560px) { #demoTag { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 70px); } }
 @media (prefers-reduced-motion: reduce) { #hpfill, #pa { transition: none; } }
 </style>
 
@@ -82,6 +108,8 @@ button:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
     <div id="hpbar"><div id="hpfill"></div></div>
     <span class="label" style="margin-top:6px">Wave</span>
     <span class="value" id="wave">1</span>
+    <span class="label" style="margin-top:6px">Crew</span>
+    <div id="crew"></div>
   </div>
   <div class="hud-group right">
     <span class="label">Score</span>
@@ -90,21 +118,41 @@ button:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
     <span class="value" id="ammo">12</span>
   </div>
 </div>
+<div id="demoTag" hidden>Demo · press a key or click to take over</div>
 <div id="pa" style="opacity:0"><b>PA</b><span id="patext"></span></div>
 
 <div class="screen" id="menu">
-  <div class="card">
+  <div class="card wide">
     <div class="eyebrow">MS Coral Majesty · Deck 9 · 02:14 a.m.</div>
     <h1>Lido Deck <span>Outbreak</span></h1>
-    <p>Something got into the midnight buffet. The passengers are coming up the stairwells and over the rails. Hold the deck until the ship reaches port.</p>
-    <dl class="controls">
-      <dt>WASD</dt><dd>Move around the deck</dd>
-      <dt>Mouse</dt><dd>Aim your flashlight, click to shoot</dd>
-      <dt>R</dt><dd>Reload · P pause · M mute</dd>
-      <dt>Touch</dt><dd>Left thumb moves, right thumb aims and fires</dd>
-    </dl>
-    <p class="small">Pool water slows everyone down. Grab buffet plates to heal and shotgun shells from the security locker drops.</p>
-    <button id="startBtn" type="button">Sound the horn</button>
+    <p>Something got into the midnight buffet. Find your crew, hold the deck, and keep everyone breathing until the ship reaches port.</p>
+    <div class="cast">
+      <div class="cast-row lead">
+        <div class="avatar" style="background:#ff7a1a">MV</div>
+        <div><div class="cast-role">You · Cruise Director</div><div class="cast-name">Mari Vega</div>
+        <div class="cast-desc">Knows every passenger by name, which makes tonight harder. Security pistol, good flashlight.</div></div>
+      </div>
+      <div class="cast-row">
+        <div class="avatar" style="background:#2e8b57">DO</div>
+        <div><div class="cast-role">Tiki bartender</div><div class="cast-name">Dev Okoro</div>
+        <div class="cast-desc">Barricaded at the Tiki Bar. Throws bottles of overproof rum that smash and burn.</div></div>
+      </div>
+      <div class="cast-row">
+        <div class="avatar" style="background:#e23a3a">HS</div>
+        <div><div class="cast-role">Lifeguard</div><div class="cast-name">Hana Sato</div>
+        <div class="cast-desc">Cut off at the pool. Heals anyone near her and shoves biters back with her rescue can.</div></div>
+      </div>
+      <div class="cast-row">
+        <div class="avatar" style="background:#1b2a4a;box-shadow:inset 0 0 0 2px #e8b04a">WB</div>
+        <div><div class="cast-role">Captain</div><div class="cast-name">Capt. Walt Brennan</div>
+        <div class="cast-desc">Holding the bow with a flare gun. His flares light up the dark and set the deck on fire.</div></div>
+      </div>
+    </div>
+    <p class="small">Walk up to crew to bring them along; stand over a downed one to revive them. WASD moves, mouse aims and shoots, R reloads, P pauses, M mutes. On touch, the left thumb moves and the right thumb aims and fires.</p>
+    <div class="btn-row">
+      <button id="startBtn" type="button">Sound the horn</button>
+      <button id="demoBtn" type="button" class="ghost">Watch the crew</button>
+    </div>
   </div>
 </div>
 
@@ -169,6 +217,30 @@ const PA_LINES = [
   'Reminder: the pool closes at 10 p.m. The pool is full.',
 ];
 
+const HERO = {
+  name: 'Mari Vega',
+  lines: {
+    start: 'Okay. Find the crew. Then find a lifeboat.',
+    all: 'That’s everyone. Nobody else goes overboard tonight.',
+    wave: ['They’re coming up the stairwells!', 'Stay behind me!', 'I am NOT doing the conga line again.', 'Deck 9, hold the line!'],
+    revive: 'Up you get. I need you.',
+  },
+};
+const ALLY_DEFS = [
+  { id: 'dev', name: 'Dev', full: 'Dev Okoro', color: '#2e8b57', skin: '#6b4429', home: { x: 1865, y: 380 },
+    where: 'at the Tiki Bar', hp: 70, range: 380, cd: 1.5,
+    lines: { wait: 'Over here! Bar’s closed!', join: 'Last call, friends. Let’s move.', down: 'Mari! I’m hit!', up: 'Thanks. Next round’s on me.',
+      wave: ['Who ordered the zombie? Oh. Right.', 'Pour one out. Then light it.', 'Keep ’em coming.'] } },
+  { id: 'hana', name: 'Hana', full: 'Hana Sato', color: '#e23a3a', skin: '#d8b48c', home: { x: 1290, y: 700 },
+    where: 'at the pool', hp: 80, range: 70, cd: .9,
+    lines: { wait: 'They’re in the pool! Help!', join: 'Stay close. I’ll patch you up.', down: 'Somebody… blow the whistle…', up: 'Back on duty.',
+      wave: ['No running on deck!', 'Breathe. I’ve got you.', 'Everybody out of the pool!'] } },
+  { id: 'cap', name: 'Walt', full: 'Capt. Walt Brennan', color: '#1b2a4a', skin: '#d9b08c', home: { x: 2370, y: 470 },
+    where: 'at the bow', hp: 90, range: 520, cd: 3,
+    lines: { wait: 'Mari! To the bow!', join: 'Thirty years at sea. Never seen this.', down: 'Abandon… ship…', up: 'Still some wind in these sails.',
+      wave: ['Steady as she goes.', 'Flare out!', 'Nobody takes my ship.'] } },
+];
+const pick = arr => arr[Math.random() * arr.length | 0];
 function deckHalf(x) {
   if (x <= DECK.x1) return HALF;
   return HALF * Math.max(0, 1 - (x - DECK.x1) / (DECK.tip - DECK.x1));
@@ -331,12 +403,20 @@ const sfx = {
   pickup() { tone('sine', 520, 880, .12, .15); tone('sine', 780, 1200, .12, .12, .08); },
   reload() { tone('square', 900, 700, .04, .06); tone('square', 600, 900, .05, .06, .25); },
   horn() { tone('sawtooth', 98, 96, 1.3, .12); tone('sawtooth', 131, 129, 1.3, .08); },
+  toss() { tone('triangle', 640, 300, .16, .06); },
+  smash() { noise(.25, .35, 3200); tone('sawtooth', 300, 80, .2, .05); },
+  flare() { noise(.45, .3, 900); tone('sine', 300, 900, .4, .06); },
+  whistle() { tone('sine', 2500, 2700, .14, .05); tone('sine', 2500, 2700, .1, .05, .18); },
+  join() { tone('sine', 440, 440, .12, .1); tone('sine', 660, 660, .12, .1, .12); tone('sine', 880, 880, .2, .1, .24); },
   groan() { tone('sawtooth', 90 + Math.random() * 40, 55, .6, .035); },
 };
 
 // ---------- State ----------
 let state = 'menu', t = 0, shake = 0, flash = 0;
-let player, zombies, bullets, particles, pickups, foam;
+let player, zombies, bullets, particles, pickups, foam, allies = [], fires = [];
+let demo = false;
+const nav = { detour: 0, side: 1, stuck: 0, wp: 0 };
+const DEMO_WP = [{ x: 470, y: 330 }, { x: 900, y: 560 }, { x: 1640, y: 700 }, { x: 1650, y: 420 }, { x: 900, y: 560 }, { x: 470, y: 770 }];
 let wave, toSpawn, spawnTimer, intermission, score, kills;
 const cam = { x: 600, y: 550 };
 let best = 0;
@@ -344,11 +424,15 @@ try { best = +localStorage.getItem('lido-best') || 0; } catch (e) {}
 
 function reset() {
   drawShip();
-  player = { x: 430, y: 550, r: 16, hp: 100, ang: 0, cd: 0, mag: 12, reload: 0, shells: 0, hurt: 0, step: 0 };
-  zombies = []; bullets = []; particles = []; pickups = []; foam = [];
+  player = { x: 430, y: 550, r: 16, hp: 100, max: 100, ang: 0, cd: 0, mag: 12, reload: 0, shells: 0, hurt: 0, step: 0, bark: '', barkT: 0 };
+  zombies = []; bullets = []; particles = []; pickups = []; foam = []; fires = [];
+  allies = ALLY_DEFS.map((d, i) => ({ ...d, x: d.home.x, y: d.home.y, r: 14, hp: d.hp, max: d.hp, state: 'wait', slot: i,
+    cd: 0, ang: Math.PI, revive: 0, bark: '', barkT: 0, hurt: 0, step: 0 }));
   wave = 0; score = 0; kills = 0; shake = 0;
+  Object.assign(nav, { detour: 0, side: 1, stuck: 0, wp: 0 });
   cam.x = player.x; cam.y = player.y;
   nextWave();
+  bark(player, HERO.lines.start, 4);
 }
 function nextWave() {
   wave++;
@@ -357,9 +441,15 @@ function nextWave() {
   intermission = 3;
   say(wave === 1 ? PA_LINES[0] : PA_LINES[1 + (wave - 2) % (PA_LINES.length - 1)]);
   sfx.horn();
+  if (wave > 1) {
+    const crew = allies.filter(a => a.state === 'follow');
+    if (crew.length && Math.random() < .65) { const a = pick(crew); bark(a, pick(a.lines.wave)); }
+    else bark(player, pick(HERO.lines.wave));
+  }
 }
+function bark(who, text, dur = 3) { who.bark = text; who.barkT = dur; }
 let paTimer = 0;
-function say(text) { $('patext').textContent = text; $('pa').style.opacity = 1; paTimer = 5; }
+function say(text) { if (state === 'menu') return; $('patext').textContent = text; $('pa').style.opacity = 1; paTimer = 5; }
 
 function spawnZombie() {
   let x, y, tries = 0, fromRail = Math.random() < .3;
@@ -387,6 +477,7 @@ const mouse = { x: 0, y: 0, down: false, active: false };
 const touch = { moveId: null, ox: 0, oy: 0, mx: 0, my: 0, aimId: null, ax: 0, ay: 0 };
 addEventListener('keydown', e => {
   const k = e.key.toLowerCase(); keys.add(k);
+  if (demo && state === 'play' && !['p', 'escape', 'm'].includes(k)) takeOver();
   if (k === 'r' && state === 'play') startReload();
   if (k === 'p' || k === 'escape') togglePause();
   if (k === 'm') muted = !muted;
@@ -395,11 +486,17 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => { keys.clear(); mouse.down = false; if (state === 'play') togglePause(); });
 cv.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
-cv.addEventListener('mousedown', e => { mouse.down = true; mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
+function takeOver() {
+  if (!demo) return;
+  demo = false; $('demoTag').hidden = true; initAudio();
+  bark(player, 'I’ve got it from here.', 2.5);
+}
+cv.addEventListener('mousedown', e => { if (demo && state === 'play') takeOver(); mouse.down = true; mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; });
 addEventListener('mouseup', () => mouse.down = false);
 cv.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('touchstart', e => {
   e.preventDefault(); mouse.active = false;
+  if (demo && state === 'play') takeOver();
   for (const tc of e.changedTouches) {
     if (tc.clientX < innerWidth / 2 && touch.moveId === null) { touch.moveId = tc.identifier; touch.ox = touch.mx = tc.clientX; touch.oy = touch.my = tc.clientY; }
     else if (touch.aimId === null) { touch.aimId = tc.identifier; touch.ax = tc.clientX; touch.ay = tc.clientY; }
@@ -432,6 +529,10 @@ function screenToWorld(px, py) {
   let x = px - vw / 2, y = py - vh / 2;
   const c = Math.cos(-sway), s = Math.sin(-sway);
   return { x: (x * c - y * s) / zoom + cam.x, y: (x * s + y * c) / zoom + cam.y };
+}
+function worldToScreen(wx, wy) {
+  const x = (wx - cam.x) * zoom, y = (wy - cam.y) * zoom, c = Math.cos(sway), s = Math.sin(sway);
+  return { x: x * c - y * s + vw / 2, y: x * s + y * c + vh / 2 };
 }
 
 // ---------- Combat ----------
@@ -476,6 +577,128 @@ function killZombie(z, i) {
   else if (roll < .15) pickups.push({ x: z.x, y: z.y, type: 'shells', life: 15 });
 }
 
+function nearestZombie(x, y, range) {
+  let best = null, bd = range * range;
+  for (const z of zombies) {
+    if (z.emerge > .4) continue;
+    const d = (z.x - x) ** 2 + (z.y - y) ** 2;
+    if (d < bd) { bd = d; best = z; }
+  }
+  return best;
+}
+function humans() { return [player, ...allies.filter(a => a.state !== 'down')]; }
+function lob(a, z, kind) {
+  const dx = z.x - a.x, dy = z.y - a.y, d = Math.hypot(dx, dy) || 1, sp = kind === 'bottle' ? 560 : 680;
+  bullets.push({ kind, x: a.x, y: a.y, vx: dx / d * sp, vy: dy / d * sp, life: d / sp, total: d / sp, spin: 0 });
+  kind === 'flare' ? sfx.flare() : sfx.toss();
+}
+function damageArea(x, y, r, dmg) {
+  for (let j = zombies.length - 1; j >= 0; j--) {
+    const z = zombies[j];
+    if ((z.x - x) ** 2 + (z.y - y) ** 2 < (r + z.r) ** 2) { z.hp -= dmg; z.hit = .08; if (z.hp <= 0) killZombie(z, j); }
+  }
+}
+function explode(b) {
+  if (b.kind === 'bottle') {
+    damageArea(b.x, b.y, 65, 2.2);
+    fires.push({ x: b.x, y: b.y, r: 55, life: 1.8, max: 1.8, dps: 2.2, flare: false });
+    burst(b.x, b.y, 16, '#ffae3b', 260); sfx.smash();
+  } else {
+    damageArea(b.x, b.y, 80, 1);
+    fires.push({ x: b.x, y: b.y, r: 85, life: 4, max: 4, dps: 2.6, flare: true });
+    burst(b.x, b.y, 22, '#ff6fa0', 300); shake = Math.max(shake, 5);
+  }
+}
+function updateAllies(dt) {
+  const p = player;
+  for (const a of allies) {
+    a.barkT = Math.max(0, a.barkT - dt); a.hurt = Math.max(0, a.hurt - dt);
+    if (a.state === 'down') {
+      if (Math.hypot(p.x - a.x, p.y - a.y) < 48) {
+        a.revive += dt;
+        if (a.revive >= 1.6) {
+          a.state = 'follow'; a.hp = a.max * .5; a.revive = 0;
+          bark(a, a.lines.up); bark(player, HERO.lines.revive, 2); sfx.join();
+        }
+      } else a.revive = Math.max(0, a.revive - dt * .5);
+      continue;
+    }
+    if (a.hp <= 0) {
+      a.state = 'down'; a.hp = 0; a.revive = 0;
+      bark(a, a.lines.down, 3.5); splat(a.x, a.y, 10, '#6d1010'); sfx.hurt();
+      say(`${a.full} is down. Stand over them to get them back up.`);
+      continue;
+    }
+    if (a.state === 'wait') {
+      if (Math.hypot(p.x - a.x, p.y - a.y) < 85) {
+        a.state = 'follow'; score += 500; bark(a, a.lines.join, 3.5); sfx.join();
+        say(`${a.full} joined the crew. +500`);
+        if (allies.every(o => o.state !== 'wait')) setTimeout(() => state === 'play' && bark(player, HERO.lines.all, 4), 2200);
+      } else if (a.barkT <= 0 && Math.random() < dt * .18) bark(a, a.lines.wait, 2.5);
+    } else {
+      const ang = p.ang + Math.PI + (a.slot - 1) * .85;
+      const tx = p.x + Math.cos(ang) * 64, ty = p.y + Math.sin(ang) * 64;
+      const dx = tx - a.x, dy = ty - a.y, d = Math.hypot(dx, dy);
+      if (d > 8) {
+        const s = Math.min(d * 4, 228) * (inPool(a.x, a.y) ? .5 : 1);
+        a.x += dx / d * s * dt; a.y += dy / d * s * dt; a.step += dt * 12;
+      }
+      if (d > 520) { a.x = p.x - Math.cos(p.ang) * 40; a.y = p.y - Math.sin(p.ang) * 40; }
+    }
+    for (const s of solids) pushOut(a, s);
+    clampDeck(a);
+    const px = a.x - p.x, py = a.y - p.y, pd = Math.hypot(px, py), rr = a.r + p.r;
+    if (pd < rr && pd > 0) { a.x += px / pd * (rr - pd); a.y += py / pd * (rr - pd); }
+    // abilities
+    a.cd -= dt;
+    const tgt = nearestZombie(a.x, a.y, a.range);
+    if (tgt) a.ang = Math.atan2(tgt.y - a.y, tgt.x - a.x);
+    else if (a.state === 'follow') a.ang = p.ang;
+    if (a.id === 'hana') {
+      for (const h of humans()) if (h !== a && Math.hypot(h.x - a.x, h.y - a.y) < 115) h.hp = Math.min(h.max, h.hp + 5 * dt);
+      a.hp = Math.min(a.max, a.hp + 2 * dt);
+      if (tgt && a.cd <= 0) {
+        a.cd = .9; a.swing = .2;
+        for (let j = zombies.length - 1; j >= 0; j--) {
+          const z = zombies[j], zx = z.x - a.x, zy = z.y - a.y, zd = Math.hypot(zx, zy) || 1;
+          if (zd < 75 && z.emerge <= 0) {
+            z.x += zx / zd * (z.type === 'chef' ? 18 : 48); z.y += zy / zd * (z.type === 'chef' ? 18 : 48);
+            z.hp -= 1; z.hit = .1; if (z.hp <= 0) killZombie(z, j);
+          }
+        }
+        burst(a.x + Math.cos(a.ang) * 22, a.y + Math.sin(a.ang) * 22, 6, '#ffd84a', 160); sfx.whistle();
+      }
+    } else if (tgt && a.cd <= 0) {
+      a.cd = a.id === 'dev' ? 1.5 * (.8 + Math.random() * .4) : 3 * (.85 + Math.random() * .3);
+      lob(a, tgt, a.id === 'dev' ? 'bottle' : 'flare');
+    }
+    a.swing = Math.max(0, (a.swing || 0) - dt);
+  }
+}
+function demoControl(dt) {
+  const p = player;
+  const z = nearestZombie(p.x, p.y, 620);
+  const downed = allies.filter(a => a.state === 'down');
+  const waiting = allies.filter(a => a.state === 'wait');
+  const byDist = (a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y);
+  let goal = downed.sort(byDist)[0] || waiting.sort(byDist)[0] || null, near = 26;
+  if (!goal) { goal = DEMO_WP[nav.wp]; near = 90; if (Math.hypot(goal.x - p.x, goal.y - p.y) < near) nav.wp = (nav.wp + 1) % DEMO_WP.length; }
+  let mx = 0, my = 0;
+  const gx = goal.x - p.x, gy = goal.y - p.y, gd = Math.hypot(gx, gy);
+  if (gd > near) { mx = gx / gd; my = gy / gd; }
+  const flee = downed.length ? 110 : 165;
+  for (const o of zombies) {
+    if (o.emerge > 0) continue;
+    const dx = p.x - o.x, dy = p.y - o.y, d = Math.hypot(dx, dy);
+    if (d < flee && d > 0) { const k = (flee - d) / flee * 2.4; mx += dx / d * k; my += dy / d * k; }
+  }
+  if (nav.detour > 0) {
+    nav.detour -= dt; const c = Math.cos(1.3 * nav.side), s = Math.sin(1.3 * nav.side);
+    [mx, my] = [mx * c - my * s, mx * s + my * c];
+  }
+  return { mx, my, aim: z ? Math.atan2(z.y - p.y, z.x - p.x) : null, fire: !!z };
+}
+
 // ---------- Update ----------
 function update(dt) {
   t += dt;
@@ -485,25 +708,38 @@ function update(dt) {
 
   const p = player;
   // movement
-  let mx = 0, my = 0;
-  if (keys.has('w') || keys.has('arrowup')) my--;
-  if (keys.has('s') || keys.has('arrowdown')) my++;
-  if (keys.has('a') || keys.has('arrowleft')) mx--;
-  if (keys.has('d') || keys.has('arrowright')) mx++;
-  if (touch.moveId !== null) {
-    const dx = touch.mx - touch.ox, dy = touch.my - touch.oy, d = Math.hypot(dx, dy);
-    if (d > 8) { const k = Math.min(1, d / 60); mx = dx / d * k; my = dy / d * k; }
+  let mx = 0, my = 0, auto = null;
+  p.barkT = Math.max(0, p.barkT - dt);
+  if (demo) { auto = demoControl(dt); mx = auto.mx; my = auto.my; }
+  else {
+    if (keys.has('w') || keys.has('arrowup')) my--;
+    if (keys.has('s') || keys.has('arrowdown')) my++;
+    if (keys.has('a') || keys.has('arrowleft')) mx--;
+    if (keys.has('d') || keys.has('arrowright')) mx++;
+    if (touch.moveId !== null) {
+      const dx = touch.mx - touch.ox, dy = touch.my - touch.oy, d = Math.hypot(dx, dy);
+      if (d > 8) { const k = Math.min(1, d / 60); mx = dx / d * k; my = dy / d * k; }
+    }
   }
   const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
   const spd = 235 * (inPool(p.x, p.y) ? .5 : 1);
+  const ox = p.x, oy = p.y;
   p.x += mx * spd * dt; p.y += my * spd * dt;
   if (ml > 0) p.step += dt * 12;
   for (const s of solids) pushOut(p, s);
   clampDeck(p);
+  if (demo && nav.detour <= 0) {
+    if (ml > .3 && Math.hypot(p.x - ox, p.y - oy) < spd * dt * ml * .35) { nav.stuck += dt; if (nav.stuck > .25) { nav.detour = .8; nav.side = Math.random() < .5 ? -1 : 1; nav.stuck = 0; } }
+    else nav.stuck = 0;
+  }
 
   // aim
   let firing = false;
-  if (touch.aimId !== null) {
+  if (auto) {
+    if (auto.aim !== null) { p.ang += Math.atan2(Math.sin(auto.aim - p.ang), Math.cos(auto.aim - p.ang)) * Math.min(1, dt * 14); firing = auto.fire; }
+    else if (ml > .2) p.ang = Math.atan2(my, mx);
+    if (p.hp < 30) p.hp = 30;
+  } else if (touch.aimId !== null) {
     const w = screenToWorld(touch.ax, touch.ay); p.ang = Math.atan2(w.y - p.y, w.x - p.x); firing = true;
   } else if (mouse.active) {
     const w = screenToWorld(mouse.x, mouse.y); p.ang = Math.atan2(w.y - p.y, w.x - p.x); firing = mouse.down || keys.has(' ');
@@ -520,12 +756,17 @@ function update(dt) {
     if (spawnTimer <= 0) { spawnZombie(); toSpawn--; spawnTimer = Math.max(.25, 1.3 - wave * .08) * (.6 + Math.random() * .8); }
   } else if (zombies.length === 0) { score += wave * 200; nextWave(); }
 
+  updateAllies(dt);
+
   // zombies
+  const hs = humans();
   for (let i = 0; i < zombies.length; i++) {
     const z = zombies[i];
     z.hit = Math.max(0, z.hit - dt);
     if (z.emerge > 0) { z.emerge -= dt; continue; }
-    let dx = p.x - z.x, dy = p.y - z.y; const d = Math.hypot(dx, dy) || 1;
+    let tg = p, td = Infinity;
+    for (const h of hs) { const hd = Math.hypot(h.x - z.x, h.y - z.y) * (h === p ? .85 : 1); if (hd < td) { td = hd; tg = h; } }
+    let dx = tg.x - z.x, dy = tg.y - z.y; const d = Math.hypot(dx, dy) || 1;
     dx /= d; dy /= d;
     if (z.detour > 0) {
       z.detour -= dt; const a = z.side * 1.35, c = Math.cos(a), s = Math.sin(a);
@@ -544,13 +785,16 @@ function update(dt) {
     for (const s of solids) pushOut(z, s);
     clampDeck(z);
     const moved = Math.hypot(z.x - bx, z.y - by);
-    if (z.detour <= 0 && moved < zs * dt * .35 && d > z.r + p.r + 4) { z.stuck += dt; if (z.stuck > .25) { z.detour = .7; z.stuck = 0; } }
+    if (z.detour <= 0 && moved < zs * dt * .35 && d > z.r + tg.r + 4) { z.stuck += dt; if (z.stuck > .25) { z.detour = .7; z.stuck = 0; } }
     else z.stuck = 0;
-    z.ang = Math.atan2(p.y - z.y, p.x - z.x);
+    z.ang = Math.atan2(tg.y - z.y, tg.x - z.x);
     z.wob += dt * (z.type === 'crew' ? 14 : 7);
-    if (d < z.r + p.r + 2) {
-      p.hp -= z.dps * dt;
-      if (p.hurt <= 0) { p.hurt = .35; sfx.hurt(); shake = Math.max(shake, 6); splat(p.x, p.y, 8, '#6d1010'); }
+    for (const h of hs) {
+      if (Math.hypot(h.x - z.x, h.y - z.y) >= z.r + h.r + 2) continue;
+      if (h === p) {
+        p.hp -= z.dps * dt;
+        if (p.hurt <= 0) { p.hurt = .35; sfx.hurt(); shake = Math.max(shake, 6); splat(p.x, p.y, 8, '#6d1010'); }
+      } else { h.hp -= z.dps * .8 * dt; h.hurt = .2; }
     }
     if (Math.random() < dt * .04) sfx.groan();
   }
@@ -558,6 +802,11 @@ function update(dt) {
   // bullets
   for (let i = bullets.length - 1; i >= 0; i--) {
     const b = bullets[i];
+    if (b.kind) {
+      b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt; b.spin += dt * 14;
+      if (b.life <= 0) { explode(b); bullets.splice(i, 1); }
+      continue;
+    }
     const steps = 3; let dead = false;
     for (let s = 0; s < steps && !dead; s++) {
       b.x += b.vx * dt / steps; b.y += b.vy * dt / steps;
@@ -588,6 +837,14 @@ function update(dt) {
     } else if (k.life <= 0) pickups.splice(i, 1);
   }
 
+  // fires (rum and flares)
+  for (let i = fires.length - 1; i >= 0; i--) {
+    const f = fires[i]; f.life -= dt;
+    damageArea(f.x, f.y, f.r * .8, f.dps * dt);
+    if (Math.random() < dt * 25) particles.push({ x: f.x + (Math.random() - .5) * f.r, y: f.y + (Math.random() - .5) * f.r, vx: 0, vy: -40, life: .5, max: .5, c: f.flare ? '#ff7fb0' : '#ffb347', s: 3 + Math.random() * 3 });
+    if (f.life <= 0) fires.splice(i, 1);
+  }
+
   // particles & wake foam
   for (let i = particles.length - 1; i >= 0; i--) {
     const q = particles[i]; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .9; q.vy *= .9; q.life -= dt;
@@ -597,14 +854,14 @@ function update(dt) {
   for (let i = foam.length - 1; i >= 0; i--) { const f = foam[i]; f.x -= 110 * dt; f.life -= dt; if (f.life <= 0) foam.splice(i, 1); }
 
   // camera
-  const look = touch.aimId !== null || mouse.active ? 90 : 0;
+  const look = demo || touch.aimId !== null || mouse.active ? 90 : 0;
   const tx = p.x + Math.cos(p.ang) * look, ty = p.y + Math.sin(p.ang) * look;
   cam.x += (tx - cam.x) * Math.min(1, dt * 5); cam.y += (ty - cam.y) * Math.min(1, dt * 5);
   const hw = vw / 2 / zoom, hh = vh / 2 / zoom;
   cam.x = hw * 2 >= WW ? WW / 2 : Math.max(hw, Math.min(WW - hw, cam.x));
   cam.y = hh * 2 >= WH ? WH / 2 : Math.max(hh, Math.min(WH - hh, cam.y));
 
-  if (p.hp <= 0) gameOver();
+  if (p.hp <= 0 && !demo) gameOver();
 }
 
 // ---------- Draw ----------
@@ -658,13 +915,41 @@ function draw() {
     }
     ctx.globalAlpha = 1;
   }
+  // fires
+  for (const f of fires) {
+    const k = Math.min(1, f.life / .6), fl = .85 + Math.sin(t * 30 + f.x) * .15;
+    const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * fl);
+    g.addColorStop(0, f.flare ? `rgba(255,220,235,${.9 * k})` : `rgba(255,230,150,${.85 * k})`);
+    g.addColorStop(.45, f.flare ? `rgba(255,70,130,${.6 * k})` : `rgba(255,120,30,${.6 * k})`);
+    g.addColorStop(1, 'rgba(255,60,0,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(f.x, f.y, f.r * fl, 0, 7); ctx.fill();
+  }
   // zombies
   for (const z of zombies) drawZombie(z);
-  // player
+  // crew and player
+  for (const a of allies) drawAlly(a);
   drawPlayer();
-  // bullets
+  // bullets and thrown things
   ctx.strokeStyle = '#ffe7a3'; ctx.lineWidth = 3; ctx.lineCap = 'round';
-  for (const b of bullets) { ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - b.vx * .018, b.y - b.vy * .018); ctx.stroke(); }
+  for (const b of bullets) {
+    if (b.kind) continue;
+    ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(b.x - b.vx * .018, b.y - b.vy * .018); ctx.stroke();
+  }
+  for (const b of bullets) {
+    if (!b.kind) continue;
+    const arc = Math.sin(Math.PI * (1 - b.life / b.total)), lift = arc * 40;
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, 7); ctx.fill();
+    ctx.save(); ctx.translate(b.x, b.y - lift);
+    if (b.kind === 'bottle') {
+      ctx.rotate(b.spin); ctx.scale(1 + arc * .4, 1 + arc * .4);
+      ctx.fillStyle = '#6b3d14'; ctx.fillRect(-4, -8, 8, 14); ctx.fillStyle = '#e8e2d0'; ctx.fillRect(-2, -12, 4, 5);
+      ctx.fillStyle = '#ffb347'; ctx.beginPath(); ctx.arc(0, -14, 3 + Math.random() * 2, 0, 7); ctx.fill();
+    } else {
+      ctx.fillStyle = '#ffd6e6'; ctx.beginPath(); ctx.arc(0, 0, 5, 0, 7); ctx.fill();
+      ctx.fillStyle = 'rgba(255,90,150,.5)'; ctx.beginPath(); ctx.arc(-b.vx * .02, -b.vy * .02, 4, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
   // particles
   for (const q of particles) { ctx.globalAlpha = Math.max(0, q.life / q.max); ctx.fillStyle = q.c; ctx.fillRect(q.x - q.s / 2, q.y - q.s / 2, q.s, q.s); }
   ctx.globalAlpha = 1;
@@ -694,8 +979,12 @@ function draw() {
   glow(dctx, 1865, 300, 150, .5);
   if (flash > 0) glow(dctx, p.x + Math.cos(p.ang) * 30, p.y + Math.sin(p.ang) * 30, 260, .8);
   for (const k of pickups) glow(dctx, k.x, k.y, 40, .7);
+  for (const a of allies) glow(dctx, a.x, a.y, a.state === 'wait' ? 95 + Math.sin(t * 4) * 12 : 75, a.state === 'down' ? .5 : .7);
+  for (const f of fires) glow(dctx, f.x, f.y, f.r * (f.flare ? 3.2 : 2.2), Math.min(1, f.life / .6));
+  for (const b of bullets) if (b.kind) glow(dctx, b.x, b.y, b.kind === 'flare' ? 120 : 50, .8);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.drawImage(dark, 0, 0);
+  drawOverlays();
 
   // hurt vignette
   if (p.hurt > 0 || p.hp < 30) {
@@ -768,6 +1057,97 @@ function drawZombie(z) {
     ctx.fillStyle = '#9bd16a'; ctx.fillRect(z.x - 22, z.y - z.r - 14, 44 * Math.max(0, z.hp / z.max), 5);
   }
 }
+function drawAlly(a) {
+  ctx.save(); ctx.translate(a.x, a.y);
+  if (a.state === 'wait') {
+    ctx.strokeStyle = `rgba(232,176,74,${.5 + Math.sin(t * 4) * .3})`; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0, 0, 26 + Math.sin(t * 4) * 4, 0, 7); ctx.stroke();
+  }
+  if (a.state === 'down') {
+    ctx.strokeStyle = 'rgba(255,90,78,.8)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(0, 0, 24, 0, 7); ctx.stroke();
+    if (a.revive > 0) {
+      ctx.strokeStyle = '#9bd16a'; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.arc(0, 0, 24, -Math.PI / 2, -Math.PI / 2 + a.revive / 1.6 * Math.PI * 2); ctx.stroke();
+    }
+    ctx.rotate(.4); ctx.globalAlpha = .85;
+  }
+  ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(3, 5, 16, 13, 0, 0, 7); ctx.fill();
+  ctx.rotate(a.state === 'down' ? 0 : a.ang);
+  if (a.state === 'down') ctx.scale(1.15, .75);
+  const hit = a.hurt > 0;
+  if (a.id === 'dev') {
+    ctx.fillStyle = '#6b3d14'; ctx.fillRect(10, 4, 10, 6); // bottle in hand
+    ctx.fillStyle = a.skin; ctx.beginPath(); ctx.arc(10, 7, 4, 0, 7); ctx.fill();
+    ctx.fillStyle = hit ? '#fff' : a.color; ctx.beginPath(); ctx.ellipse(0, 0, 11, 15, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f2a53a';
+    for (const [px, py] of [[-4, -8], [3, 7], [-5, 4], [4, -4]]) { ctx.beginPath(); ctx.arc(px, py, 2, 0, 7); ctx.fill(); }
+    ctx.fillStyle = a.skin; ctx.beginPath(); ctx.arc(2, 0, 7.5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#1a1210'; ctx.beginPath(); ctx.arc(0, 0, 6.5, Math.PI * .5, Math.PI * 1.5); ctx.fill();
+  } else if (a.id === 'hana') {
+    const sw = a.swing > 0 ? Math.sin(a.swing / .2 * Math.PI) * 10 : 0;
+    ctx.fillStyle = '#ffcf33'; ctx.fillRect(8 + sw, -12, 18, 8); // rescue can
+    ctx.fillStyle = a.skin; ctx.beginPath(); ctx.ellipse(0, 0, 11, 14, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = hit ? '#fff' : a.color; ctx.beginPath(); ctx.ellipse(0, 0, 8, 12, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(-2, -6, 4, 12); ctx.fillRect(-6, -2, 12, 4);
+    ctx.fillStyle = a.skin; ctx.beginPath(); ctx.arc(2, 0, 7, 0, 7); ctx.fill();
+    ctx.fillStyle = '#121212'; ctx.beginPath(); ctx.arc(-1, 0, 6.5, Math.PI * .4, Math.PI * 1.6); ctx.fill();
+    ctx.fillRect(-12, -2, 6, 4); // ponytail
+  } else {
+    ctx.fillStyle = '#20242b'; ctx.fillRect(9, 2, 20, 8); ctx.fillStyle = '#ff5a8a'; ctx.fillRect(25, 3, 6, 6); // flare gun
+    ctx.fillStyle = hit ? '#fff' : a.color; ctx.beginPath(); ctx.ellipse(0, 0, 12, 16, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = '#e8b04a'; ctx.fillRect(-4, -16, 7, 4); ctx.fillRect(-4, 12, 7, 4);
+    ctx.fillRect(4, -2, 3, 4);
+    ctx.fillStyle = a.skin; ctx.beginPath(); ctx.arc(2, 0, 8, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 7.5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#111'; ctx.fillRect(4, -7, 4, 14);
+    ctx.fillStyle = '#e8b04a'; ctx.fillRect(-2, -2, 4, 4);
+  }
+  ctx.restore();
+  if (a.state === 'follow' && a.hp < a.max) {
+    ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(a.x - 16, a.y + 20, 32, 4);
+    ctx.fillStyle = a.hp / a.max > .4 ? '#9bd16a' : '#ff5a4e'; ctx.fillRect(a.x - 16, a.y + 20, 32 * a.hp / a.max, 4);
+  }
+}
+function bubble(x, y, text) {
+  ctx.font = '600 15px "Barlow Condensed", "Arial Narrow", sans-serif'; ctx.textAlign = 'left';
+  const w = ctx.measureText(text).width + 18, h = 26;
+  const bx = Math.max(8, Math.min(vw - w - 8, x - w / 2)), by = Math.max(8, y - h - 12);
+  ctx.fillStyle = 'rgba(243,234,215,.96)'; roundRect(ctx, bx, by, w, h, 5); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(Math.max(bx + 8, Math.min(bx + w - 8, x)) - 6, by + h); ctx.lineTo(x, by + h + 8);
+  ctx.lineTo(Math.max(bx + 8, Math.min(bx + w - 8, x)) + 6, by + h); ctx.fill();
+  ctx.fillStyle = '#14203a'; ctx.fillText(text, bx + 9, by + 18);
+}
+function drawOverlays() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const s = 22 * zoom;
+  for (const a of allies) {
+    const q = worldToScreen(a.x, a.y);
+    const off = q.x < 24 || q.x > vw - 24 || q.y < 24 || q.y > vh - 24;
+    if (off) {
+      if (a.state === 'follow') continue;
+      const cx = Math.max(30, Math.min(vw - 30, q.x)), cy = Math.max(110, Math.min(vh - 70, q.y));
+      const ang = Math.atan2(q.y - cy, q.x - cx);
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang);
+      ctx.fillStyle = a.state === 'down' ? '#ff5a4e' : '#e8b04a';
+      ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-8, -10); ctx.lineTo(-8, 10); ctx.fill(); ctx.restore();
+      ctx.font = '700 13px "Barlow Condensed", sans-serif'; ctx.textAlign = cx > vw / 2 ? 'right' : 'left';
+      ctx.fillStyle = '#f3ead7';
+      ctx.fillText(`${a.name.toUpperCase()} · ${a.state === 'down' ? 'DOWN' : 'NEEDS YOU'}`, cx + (cx > vw / 2 ? -20 : 20), cy + 4);
+      continue;
+    }
+    ctx.font = '700 12px "Barlow Condensed", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillStyle = a.state === 'down' ? '#ff5a4e' : '#e8b04a';
+    ctx.fillText(a.name.toUpperCase(), q.x, q.y + s + 18);
+    if (a.barkT > 0) bubble(q.x, q.y - s, a.bark);
+  }
+  const pq = worldToScreen(player.x, player.y);
+  if (state !== 'menu') {
+    ctx.font = '700 12px "Barlow Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#ff9a4a';
+    ctx.fillText('MARI', pq.x, pq.y + s + 18);
+  }
+  if (player.barkT > 0) bubble(pq.x, pq.y - s, player.bark);
+}
 function drawPlayer() {
   const p = player;
   ctx.save(); ctx.translate(p.x, p.y);
@@ -801,6 +1181,14 @@ function updateHud() {
   if (hud.wave !== wave) { hud.wave = wave; $('wave').textContent = wave; }
   const ammo = p.shells > 0 ? `${p.shells} shells` : p.reload > 0 ? 'Reloading' : `${p.mag} / 12`;
   if (hud.ammo !== ammo) { hud.ammo = ammo; $('ammo').textContent = ammo; }
+  const crewKey = allies.map(a => a.state + (a.state === 'follow' ? Math.ceil(a.hp / a.max * 10) : '')).join('|');
+  if (hud.crew !== crewKey) {
+    hud.crew = crewKey;
+    $('crew').innerHTML = allies.map(a => {
+      const st = a.state === 'wait' ? a.where : a.state === 'down' ? 'Down' : `${Math.ceil(a.hp / a.max * 100)}%`;
+      return `<div class="crew-row ${a.state}"><span class="dot" style="background:${a.color};box-shadow:0 0 0 1px #e8b04a"></span><span>${a.name}</span><span class="st">${st}</span></div>`;
+    }).join('');
+  }
   const hp = Math.max(0, Math.round(p.hp));
   if (hud.hp !== hp) {
     hud.hp = hp; const f = $('hpfill'); f.style.width = hp + '%';
@@ -809,10 +1197,12 @@ function updateHud() {
 }
 
 // ---------- Flow ----------
-function start() {
+function start(isDemo) {
   initAudio(); if (ac && ac.state === 'suspended') ac.resume();
-  reset(); state = 'play';
+  state = 'play'; demo = !!isDemo;
+  reset();
   $('menu').hidden = true; $('over').hidden = true; $('paused').hidden = true; $('hud').hidden = false;
+  $('demoTag').hidden = !demo;
   cv.focus();
 }
 function gameOver() {
@@ -820,7 +1210,8 @@ function gameOver() {
   if (score > best) { best = score; try { localStorage.setItem('lido-best', best); } catch (e) {} }
   $('finalScore').textContent = score.toLocaleString(); $('finalWave').textContent = wave;
   $('bestScore').textContent = best.toLocaleString();
-  $('overLine').textContent = `${kills} passengers put to rest. The Coral Majesty sails on without you.`;
+  const standing = allies.filter(a => a.state === 'follow').length;
+  $('overLine').textContent = `Mari Vega put ${kills} passengers to rest. ${standing} of 3 crew still standing. The Coral Majesty sails on without her.`;
   $('over').hidden = false; $('pa').style.opacity = 0;
   sfx.horn();
   setTimeout(() => $('againBtn').focus(), 50);
@@ -829,30 +1220,25 @@ function togglePause() {
   if (state === 'play') { state = 'paused'; $('paused').hidden = false; }
   else if (state === 'paused') { state = 'play'; $('paused').hidden = true; last = performance.now(); }
 }
-$('startBtn').onclick = start;
-$('againBtn').onclick = start;
+$('startBtn').onclick = () => start(false);
+$('againBtn').onclick = () => start(false);
+$('demoBtn').onclick = () => start(true);
 $('resumeBtn').onclick = togglePause;
 document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'play') togglePause(); });
 
-// attract mode: a calm deck behind the menu
-drawShip();
-player = { x: 900, y: 550, r: 16, hp: 100, ang: 0, cd: 0, mag: 12, reload: 0, shells: 0, hurt: 0, step: 0 };
-zombies = []; bullets = []; particles = []; pickups = []; foam = [];
-cam.x = 1100; cam.y = 550;
+// attract mode: the crew plays itself behind the menu
+demo = true; reset();
+if (document.fonts) document.fonts.ready.then(() => { if (state === 'menu') drawShip(); });
 
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   if (state === 'play') { update(dt); updateHud(); }
-  else if (state === 'menu') {
-    t += dt; sway = Math.sin(t * .45) * .012; player.ang = t * .6;
-    cam.x = 1100 + Math.sin(t * .1) * 500;
-    if (Math.random() < dt * 30) foam.push({ x: DECK.x0 - 100, y: DECK.cy + (Math.random() - .5) * 600, r: 6 + Math.random() * 18, life: 6 });
-    for (let i = foam.length - 1; i >= 0; i--) { const f = foam[i]; f.x -= 110 * dt; f.life -= dt; if (f.life <= 0) foam.splice(i, 1); }
-  }
+  else if (state === 'menu') update(dt);
   draw();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+if (location.hash === '#demo') start(true);
 })();
 </script>
